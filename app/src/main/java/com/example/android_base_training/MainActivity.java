@@ -28,14 +28,20 @@ import okhttp3.Response;
 import com.newrelic.agent.android.FeatureFlag;
 import com.newrelic.agent.android.NewRelic;
 import com.newrelic.agent.android.util.NetworkFailure;
-
+import android.os.Handler;
 
 public class MainActivity extends AppCompatActivity {
  private Button crashme, getHttp, customattr1, customattr2, event, bread, handled, anr, newpage;
  private TextView resultText;
- public String url = "http://192.168.1.2:3001/webrequest";
+ public String url = "http://3.230.230.121/mobile1/webrequest";
 
-   String token = "<YOUR TOKEN>";
+ public final Handler handler = new Handler();
+
+
+
+    String token = "***REMOVED***";
+
+
 
     public class BubbleSortExample {
         public void bubbleSort(int[] arr) {
@@ -103,7 +109,13 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                NewRelic.crashNow("This is crash demo");
+                resultText.setText(R.string.crash_msg);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        NewRelic.crashNow("This is a crash demo");
+                    }
+                }, 5000);
                 Log.i("demo", "I crashed it: ");
             }
         });
@@ -119,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
                 customattr1.setOnClickListener(this::onClick);
                 NewRelic.logInfo("Test for sending Custom Attribute 1: " + "storeId");
                 NewRelic.endInteraction("Display My storeID as custom attribute 1");
+                resultText.setText("setAttribute : storeId");
+
                 Log.i("intract", "END Sending My Custom Attribute 1 using startInteract ");
             }
         });
@@ -129,6 +143,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Log.i("demo", "Sending Custom Attribute 2: ");
                 NewRelic.setAttribute("rate", 10000.99);
+                resultText.setText("setAttribute : rate");
+
             }
         });
 
@@ -145,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
                 attributes.put("maxSpeed", 12);
 
                 NewRelic.recordCustomEvent("Car", attributes);
-
+                resultText.setText("recordCustomEvent : Car");
                 Log.i("demo", "Sending Event: Car");
 
                 Map<String, Object> userActionAttributes = new HashMap<String, Object>();
@@ -157,6 +173,8 @@ public class MainActivity extends AppCompatActivity {
 
                 NewRelic.recordCustomEvent("UserAction", userActionAttributes);
                 Log.i("demo", "Sending Event: UserAction");
+                resultText.setText("recordCustomEvent : Car / User complete");
+
             }
 
         });
@@ -191,6 +209,8 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println(list[10]);
                 } catch (Exception e) {
                     System.out.println("Oops!");
+                    resultText.setText("Handled Exception");
+
                     NewRelic.recordHandledException(e);
                 }
             }
@@ -200,7 +220,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-//                Log.i("demo", "Application Not Responding: ");
+                resultText.setText("Starting ANR");
+                Log.i("demo", "Application Not Responding: ");
                 Random random = new Random();
                 int ranarraylength = 1000000;
                 int[] num = new int[ranarraylength];
@@ -211,6 +232,8 @@ public class MainActivity extends AppCompatActivity {
                 BubbleSortExample bubbleSort = new BubbleSortExample();
                 bubbleSort.bubbleSort(num);
                 Log.d("demo", "CauseANR finished");
+                resultText.setText("ANR Complete");
+
             }
         });
 
@@ -250,6 +273,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            resultText.setText("onPostExecute()");
             if (s != null) {
                 Log.i("newrelic", s);
                 resultText.setText(s);
